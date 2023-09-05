@@ -1,104 +1,105 @@
-// BigRedButton.js - Dream Cheeky Big Red Button node.js/node-hid driver
-// MIT licensed. (C) Dj Walker-Morgan 2013
+const HID = require('node-hid');
+const util = require('util');
+const events = require('events');
+const { exec } = require('child_process'); // Import the exec function from child_process module
 
-var HID = require('node-hid');
-var util = require('util');
-var events = require('events');
+let allDevices;
+const cmdStatus = Buffer.from([0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02]);
+let lastState;
 
-var allDevices;
-var cmdStatus=new Buffer([ 0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 ]);
-var lastState;
+const LID_DOWN = 0x15, LID_UP = 0x17, BUTTON_DOWN = 0x16;
 
-var LID_DOWN=0x15, LID_UP=0x17, BUTTON_DOWN=0x16;
-
-function getAllDevices()
-{
-     allDevices = HID.devices(7476,13);
-     return allDevices;
+function getAllDevices() {
+    allDevices = HID.devices(7476, 13);
+    return allDevices;
 }
 
-function BigRedButton(index)
-{
-   if (!arguments.length) {
-      index = 0;
-   }
+function BigRedButton(index) {
+    if (!arguments.length) {
+        index = 0;
+    }
 
-   var bigRedButton = getAllDevices();
-   if (!bigRedButton.length) {
-      throw new Error("No BigRedButton could be found");
-   }
+    const bigRedButton = getAllDevices();
+    if (!bigRedButton.length) {
+        throw new Error("No BigRedButton could be found");
+    }
 
-   if (index > bigRedButton.length || index < 0) {
-      throw new Error("Index " + index + " out of range, only " + bigRedButton.length + " BigRedButton found");
-   }
-   this.button = bigRedButton[index];
-   this.hid = new HID.HID(bigRedButton[index].path);
+    if (index > bigRedButton.length || index < 0) {
+        throw new Error(`Index ${index} out of range, only ${bigRedButton.length} BigRedButton found`);
+    }
 
-   this.hid.write(cmdStatus);
+    this.button = bigRedButton[index];
+    this.hid = new HID.HID(bigRedButton[index].path);
 
-   var that=this;
-   this.hid.read(function(error,data) {
-      lastState=data[0];
-      that.hid.read(that.interpretData.bind(that));
-   });
-   this.interval = setInterval(this.askForStatus.bind(this),100);
-   this.close = function() {
-      clearInterval(this.interval);
-      this.interval = false;
-      setTimeout(function() {
-         this.hid.close();
-      }.bind(this), 100);
-      this.emit("buttonGone");
-   };
+    this.hid.write(cmdStatus);
+
+    const that = this;
+    this.hid.read(function (error, data) {
+        lastState = data[0];
+        that.hid.read(that.interpretData.bind(that));
+    });
+
+    this.interval = setInterval(this.askForStatus.bind(this), 100);
+    this.close = function () {
+        clearInterval(this.interval);
+        this.interval = false;
+        setTimeout(() => {
+            this.hid.close();
+        }, 100);
+        this.emit("buttonGone");
+    };
 }
 
 util.inherits(BigRedButton, events.EventEmitter);
 
-BigRedButton.prototype.askForStatus = function() {
-   try {
-      this.hid.write(cmdStatus);
-   } catch(e) {
-      this.close();
-   }
+BigRedButton.prototype.askForStatus = function () {
+    try {
+        this.hid.write(cmdStatus);
+    } catch (e) {
+        this.close();
+    }
 };
 
-BigRedButton.prototype.interpretData = function(error, data) {
-   if (!this.interval || error || !data) {
-      this.close();
-      return;
-   }
-   var newState=data[0];
+BigRedButton.prototype.interpretData = function (error, data) {
+    if (!this.interval || error || !data) {
+        this.close();
+        return;
+    }
+    const newState = data[0];
 
-   if (lastState!=newState) {
-      if (lastState==LID_DOWN && newState==LID_UP) {
-         this.emit("lidRaised");
-      } else if (lastState==LID_UP && newState==BUTTON_DOWN) {
-         this.emit("buttonPressed");
-      } else if (lastState==BUTTON_DOWN && newState==LID_UP) {
-         this.emit("buttonReleased");
-      } else if (lastState==BUTTON_DOWN && newState==LID_DOWN) {
-         this.emit("buttonReleased");
-         this.emit("lidClosed");
-      } else if (lastState==LID_UP && newState==LID_DOWN) {
-         this.emit("lidClosed");
-      }
-      lastState=newState;
-   }
+    if (lastState !== newState) {
+        if (lastState === LID_DOWN && newState === LID_UP) {
+            this.emit("lidRaised");
+            exec('echo Lid Raised'); // Execute Windows command here
+        } else if (lastState === LID_UP && newState === BUTTON_DOWN) {
+            this.emit("buttonPressed");
+            exec('echo Button Pressed'); // Execute Windows command here
+        } else if ((lastState === BUTTON_DOWN && newState === LID_UP) || (lastState === BUTTON_DOWN && newState === LID_DOWN)) {
+            this.emit("buttonReleased");
+            exec('echo Button Released'); // Execute Windows command here
+        } else if (lastState === LID_UP && newState === LID_DOWN) {
+            this.emit("lidClosed");
+            exec('echo Lid Closed'); // Execute Windows command here
+        }
+        lastState = newState;
+    }
 
-   this.hid.read(this.interpretData.bind(this));
-}
+    this.hid.read(this.interpretData.bind(this));
+};
 
-BigRedButton.prototype.isLidUp = function() {
-   return lastState==LID_UP || lastState==BUTTON_DOWN;
-}
+BigRedButton.prototype.isLidUp = function () {
+    return lastState === LID_UP || lastState === BUTTON_DOWN;
+};
 
-BigRedButton.prototype.isButtonPressed = function() {
-   return lastState==BUTTON_DOWN;
-}
+BigRedButton.prototype.isButtonPressed = function () {
+    return lastState === BUTTON_DOWN;
+};
 
-BigRedButton.prototype.isLidDown = function() {
-   return lastState==LID_DOWN;
-}
+BigRedButton.prototype.isLidDown = function () {
+    return lastState === LID_DOWN;
+};
 
 exports.BigRedButton = BigRedButton;
-exports.deviceCount = function () { return getAllDevices().length; }
+exports.deviceCount = function () {
+    return getAllDevices().length;
+};

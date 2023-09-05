@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/codepope/BigRedButtonNodeHID",
   "dependencies": {
-    "node-hid": "^0.5.1"
+    "node-hid": "^2.1.2"
   }
 }
