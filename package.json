@@ -1,10 +1,22 @@
 {
-  "name": "BigRedButtonNodeHID",
+  "name": "BigRedButton",
   "version": "1.0.0",
   "description": "Big red button helper.",
   "main": "BigRedButton.js",
+  "bin": {
+    "big-red-button-test": "BigRedButtonTest.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "pkg": {
+    "assets": [
+      "event_actions.json"
+    ],
+    "scripts": [
+      "BigRedButton.js",
+      "BigRedButtonTest.js"
+    ]
   },
   "repository": {
     "type": "git",
