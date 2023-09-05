@@ -1,13 +1,15 @@
 {
-  "name": "BigRedButton",
+  "name": "big-red-button",
   "version": "1.0.0",
   "description": "Big red button helper.",
-  "main": "BigRedButton.js",
+  "main": "main.js",
   "bin": {
     "big-red-button-test": "BigRedButtonTest.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "package": "electron-packager ./ big-red-button --platform=win32 --arch=x64"
   },
   "pkg": {
     "assets": [
@@ -38,6 +40,10 @@
   },
   "homepage": "https://github.com/codepope/BigRedButtonNodeHID",
   "dependencies": {
+    "electron": "^13.1.7",
     "node-hid": "^2.1.2"
+  },
+  "devDependencies": {
+    "electron-packager": "^17.1.2"
   }
 }

@@ -1,6 +1,8 @@
 const HID = require('node-hid');
 const util = require('util');
 const events = require('events');
+const fs = require('fs');
+const path = require('path');
 const { exec } = require('child_process'); // Import the exec function from child_process module
 
 let allDevices;
@@ -14,7 +16,9 @@ function getAllDevices() {
     return allDevices;
 }
 
-function BigRedButton(index) {
+
+function BigRedButton(index, eventActions = {}) {
+
     if (!arguments.length) {
         index = 0;
     }
