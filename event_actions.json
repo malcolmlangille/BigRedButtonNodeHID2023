@@ -1,0 +1,18 @@
+{
+    "buttonPressed": {
+        "message": "Button has been pressed!",
+        "executable": "\"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe\""
+    },
+    "buttonReleased": {
+        "message": "Button has been released!",
+        "executable": "C:\\Path\\To\\Executable2.exe"
+    },
+    "lidRaised": {
+        "message": "Lid has been raised!",
+        "executable": "C:\\Path\\To\\Executable3.exe"
+    },
+    "lidClosed": {
+        "message": "Lid has been closed!",
+        "executable": "C:\\Path\\To\\Executable4.exe"
+    }
+}
