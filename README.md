@@ -1,7 +1,7 @@
 BigRedButtonNodeHID
 ===================
 
-A node-hid based driver to read the Dream Cheeky Big Red Button from node.js.
+A node-hid based driver to read the Gadget Tree or the Dream Cheeky Big Red Button from node.js.
 
 The test gives an example of use. Polls every 100ms for status and emits lidRaised, lidClosed, buttonPressed, buttonReleased events. Also has functions isLidUp(), isLidDown() and isButtonPressed() for determining state with reference to events.
 
